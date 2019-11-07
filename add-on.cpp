@@ -22,10 +22,10 @@ if(type == "R"){
 	if(str[1]=="add"){
 		answer = "000";
 	}else{
-		answer = "001";
+		answer = "001"; //bug opcode
 	}
 	
-	if(atoi(str[2]) >=0 && atoi(str[2]) <= 8){
+	if(atoi(str[2]) >=0 && atoi(str[2]) <= 8){ // <8
 		answer += reg(str[2]);
 	}else{
 		cerr << "Your register not define!!";
