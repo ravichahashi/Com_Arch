@@ -7,7 +7,7 @@ using namespace std;
 int main(){
   string s="-2340kjlhkj";
    string d="aaa";
-   unsigned int i = -1;
-   cout<<stoi(s);
+   int h = 1<<2;
+   cout<<" "<<h;
     return 0;    
 }

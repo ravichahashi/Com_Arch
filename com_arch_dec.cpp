@@ -49,6 +49,7 @@ int main()
     //------------------    convert
     while (!inFile.eof())
     {
+        int dec = 0;
         char type;
         if (inFile.peek() != '\t' && inFile.peek() != ' ')
             inFile >> temp; // skip label
@@ -56,45 +57,46 @@ int main()
         inFile >> temp;
         if (temp.compare("add") == 0)
         {
-            cout << "0000000000";
             type = 'R';
         }
         else if (temp.compare("nand") == 0)
         {
-            cout << "0000000001";
+            dec += 1 << 22;
             type = 'R';
         }
         else if (temp.compare("lw") == 0)
         {
-            cout << "0000000010";
+            dec += 2 << 22;
             type = 'I';
         }
         else if (temp.compare("sw") == 0)
         {
-            cout << "0000000011";
+            dec += 3 << 22;
             type = 'I';
         }
         else if (temp.compare("beq") == 0)
         {
-            cout << "0000000100";
+            dec += 4 << 22;
             type = 'I';
         }
         else if (temp.compare("jalr") == 0)
         {
-            cout << "0000000101";
+            dec += 5 << 22;
             type = 'J';
         }
         else if (temp.compare("halt") == 0)
         {
-            cout << "00000001100000000000000000000000\n";
+            dec += 6 << 22;
             type = 'O';
+            cout << dec << endl;
             inFile.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
         else if (temp.compare("noop") == 0)
         {
-            cout << "00000001110000000000000000000000\n";
+            dec += 7 << 22;
             type = 'O';
+            cout << dec << endl;
             inFile.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
@@ -104,48 +106,23 @@ int main()
         }
         else
         {
-            cerr << "\nUnrecognized opcode.\n";
+            cerr << "\nUnrecognized opcode: " << temp << endl;
             exit(1);
         }
 
         // ---------------- field 1-2
         if (type != '.')
         {
-            for (int round = 0; round < 2; round++)
-            {
-                inFile >> temp;
-                int reg = temp[0] - '0';
-                int tempR = reg;
-                string convert = "";
-                while (reg > 0)
-                {
-                    if (reg % 2)
-                    {
-                        convert = "1" + convert;
-                    }
-                    else
-                    {
-                        convert = "0" + convert;
-                    }
-                    reg >>= 1;
-                }
-                if (tempR == 0)
-                {
-                    convert = "000" + convert;
-                }
-                else if (tempR < 2)
-                {
-                    convert = "00" + convert;
-                }
-                else if (tempR < 4)
-                {
-                    convert = "0" + convert;
-                }
-                cout << convert;
-            }
+
+            inFile >> temp;
+            int reg = temp[0] - '0';
+            dec += reg << 19;
+            inFile >> temp;
+            reg = temp[0] - '0';
+            dec += reg << 16;
             if (type == 'J')
             {
-                cout << "0000000000000000";
+                cout << dec << endl;
                 inFile.ignore(numeric_limits<streamsize>::max(), '\n');
                 continue;
             }
@@ -155,35 +132,8 @@ int main()
         inFile >> temp;
         if (type == 'R')
         {
-            cout << "0000000000000";
             int dest = temp[0] - '0';
-            int tempR = dest;
-            string convert = "";
-            while (dest > 0)
-            {
-                if (dest % 2)
-                {
-                    convert = "1" + convert;
-                }
-                else
-                {
-                    convert = "0" + convert;
-                }
-                dest >>= 1;
-            }
-            if (tempR == 0)
-            {
-                convert = "000" + convert;
-            }
-            else if (tempR < 2)
-            {
-                convert = "00" + convert;
-            }
-            else if (tempR < 4)
-            {
-                convert = "0" + convert;
-            }
-            cout << convert;
+            dec += dest;
         }
         else
         {
@@ -215,43 +165,25 @@ int main()
             {
                 num = stoi(temp);
             }
-            int digit = 32;
             if (type == 'I')
             {
-                digit = 16;
-                if (num < 0)
+                while (num < -32768 || num > 32767)
                 {
-                    num += 65536;
-                }
-                else if (num > 65535)
-                {
-                    num -= 65536;
+                    if (num < -32768)
+                    {
+                        num += 65536;
+                    }
+                    else
+                    {
+                        num -= 65536;
+                    }
                 }
             }
-            string convert = "";
-            unsigned int num2 = num;
-            while (num2 > 0)
-            {
-                if (num2 % 2)
-                {
-                    convert = "1" + convert;
-                }
-                else
-                {
-                    convert = "0" + convert;
-                }
-                num2 >>= 1;
-            }
-            int zero = digit - convert.size();
-            for (int i = 0; i < zero; i++)
-            {
-                convert = "0" + convert;
-            }
-            cout << convert;
+            dec += num;
         }
+        cout << dec << endl;
 
         inFile.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout << endl;
     }
     inFile.close();
     return 0;
