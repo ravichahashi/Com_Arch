@@ -153,6 +153,7 @@ int main()
                     {
                         num = addr[i];
                         undefine = false;
+                        break;
                     }
                 }
                 if (undefine)
