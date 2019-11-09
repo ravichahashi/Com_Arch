@@ -8,11 +8,8 @@
 #include <vector>
 using namespace std;
 
-
-
 int main()
 {
-    string temp;
     //------------------------- Lauching file .txt -------------------------
     ifstream inFile;
     inFile.open("test.txt");
@@ -24,23 +21,32 @@ int main()
     }
     //------------------------- Reading file .txt -------------------------
     //-------------------- Count line -------------------------
-
-    vector<string> tokens;
-    while (getline(inFile, temp))
+    vector<string> label;
+    vector<int> addr;
+    string temp;
+    int line=0;
+    while (!inFile.eof())
     {
-        istringstream iss(temp);
-        copy(istream_iterator<string>(iss),istream_iterator<string>(),back_inserter(tokens));
-        if(tokens[0] == "beq" || tokens[0] == "lw" || tokens[0] == "add"){
-            for(int i = 0 ; i < tokens.size() ; i++){
-                cout << tokens[i] << " ";
+        if (inFile.peek() != '\t')
+        {
+            inFile >> temp;
+            for (string s : label)
+            {
+                cout << s << " ";
+                if(temp.compare(s) == 0){
+                    cerr<<"Duplicate Label.\n";
+                    exit(1);
+                }
             }
+            label.push_back(temp);
+            addr.push_back(line);
+            cout << endl;
         }
-        //----------------- clear vector
-        tokens.clear();
+        inFile.ignore(numeric_limits<streamsize>::max(), '\n');
+        line++;
     }
 
     //------------------------- Stop Lauching file .txt -------------------------
     inFile.close();
     return 0;
 }
-
