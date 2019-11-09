@@ -108,7 +108,7 @@ int main()
         
         
         
-        
+       cout<<endl; 
     }
 
     inFile.close();
