@@ -20,7 +20,7 @@ int main(int argc, char ** argv)
         exit(1); // call system to stop
     }
 
-    //--------------------  recognize label
+    //--------------------  recognize label ------------------------
     int line = 0;
     while (!inFile.eof())
     {
@@ -46,9 +46,10 @@ int main(int argc, char ** argv)
     inFile.clear();
     inFile.seekg(ios::beg);
 
-    //------------------    convert
+    //------------------    convert -----------------------------
     while (!inFile.eof())
     {
+        int reg[8];
         int dec = 0;
         char type;
         if (inFile.peek() != '\t' && inFile.peek() != ' ')
