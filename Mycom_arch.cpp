@@ -27,6 +27,10 @@ int main(int argc, char **argv)
         if (inFile.peek() != '\t' && inFile.peek() != ' ')
         {
             inFile >> temp;
+            if(isdigit(temp[0])){
+                cerr<<"First char is digit.";
+                exit(1);
+            }
             // --- check duplicate
             for (string s : label)
             {

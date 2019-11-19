@@ -16,7 +16,6 @@ int main(int argc, char **argv)
     vector<int> fill;
     int reg[8] = {0};
     stack<int> stack;
-    int timeStack = 0;
     string temp;
 
     inFile.open("test02.txt");
@@ -160,6 +159,7 @@ int main(int argc, char **argv)
                 {
                     if (temp.compare(label[i]) == 0)
                     {
+                        num = addr[i];
                         if (temp.compare("stack") == 0)
                         {
                             addr[i]--;
@@ -170,7 +170,6 @@ int main(int argc, char **argv)
                         {
                             reg[regB] = fill[i];
                         }
-                        num = addr[i];
                         undefine = false;
                         break;
                     }
@@ -181,6 +180,7 @@ int main(int argc, char **argv)
                     exit(1);
                 }
                 num -= reg[regA];
+                cout<<"of:"<<num<<" ";
             }
             else
             {
@@ -229,7 +229,6 @@ int main(int argc, char **argv)
                         {
                             addr[i]++;
                             stack.push(reg[regB]);
-                            timeStack++;
                         }
                         undefine = false;
                         break;
@@ -241,6 +240,7 @@ int main(int argc, char **argv)
                     exit(1);
                 }
                 num -= reg[regA];
+                cout<<"of:"<<num<<" ";
             }
             else
             {
@@ -295,6 +295,7 @@ int main(int argc, char **argv)
                     exit(1);
                 }
                 num -= (line + 1);
+                cout<<"of:"<<num<<" ";
             }
             else
             {
@@ -377,10 +378,6 @@ int main(int argc, char **argv)
         line++;
     }
     inFile.close();
-    for (int i = 1; i < timeStack; i++)
-    {
-        outFile << 0 << endl;
-    }
     outFile.close();
     return 0;
 }

@@ -6,6 +6,8 @@
 #include <limits>
 using namespace std;
 
+void toBinary(int);
+
 int main(int argc, char **argv)
 {
     ifstream inFile;
@@ -193,6 +195,7 @@ int main(int argc, char **argv)
                 }
             }
             dec += num;
+            cout<<"of:"<<num<<"  ";
         }
         cout << dec << endl;
         line++;
@@ -200,4 +203,28 @@ int main(int argc, char **argv)
     }
     inFile.close();
     return 0;
+}
+
+void toBinary(int num)
+{
+    string convert = "";
+    unsigned int num2 = num;
+    while (num2 > 0)
+    {
+        if (num2 % 2)
+        {
+            convert = "1" + convert;
+        }
+        else
+        {
+            convert = "0" + convert;
+        }
+        num2 >>= 1;
+    }
+    int zero = 32 - convert.size();
+    for (int i = 0; i < zero; i++)
+    {
+        convert = "0" + convert;
+    }
+    cout << convert << endl;
 }

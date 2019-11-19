@@ -2,12 +2,12 @@
 #include<set>
 #include<vector>
 #include<string.h>
+#include<stack>
 using namespace std;
 
 int main(){
-  string s="-2340kjlhkj";
-   string d="aaa";
-   int h = 1<<2;
-   cout<<" "<<h;
+  stack<int> d;
+  d.push(12);
+  cout<<d.top();
     return 0;    
 }
