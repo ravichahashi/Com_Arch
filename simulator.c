@@ -208,7 +208,6 @@ void writeMem(int addr, int data, stateType *statePtr)
 	if (addr < statePtr->numMemory)
 	{
 		statePtr->mem[addr] = statePtr->reg[data];
-		printf(" memaddr %d PPPPPPPPPPPPPPPPPPPPPPPPPPP\n", addr);
 	}
 }
 
@@ -217,7 +216,6 @@ void writeReg(int addr, int data, stateType *statePtr)
 	if (addr < NUMREGS)
 	{
 		statePtr->reg[addr] = data;
-		printf(" regaddr %d ZZZZZZZZZZZZZZZZZZZZZZZZZ\n", addr);
 	}
 }
 
