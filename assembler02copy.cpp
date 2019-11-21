@@ -7,6 +7,18 @@
 #include <limits>
 using namespace std;
 
+#define LEVEL_OF_STACK 10
+
+class myObj
+{
+public:
+    vector<string> label;
+    vector<int> addr;
+    vector<int> fill;
+    int reg[8] = {0};
+    stack<int> stack;
+};
+
 bool haveLabel(ifstream &);
 int getReg(ifstream &);
 bool isLabel(string);
@@ -15,17 +27,13 @@ void nextLine(ifstream &);
 void to16Bits(int &);
 void errNotify(char);
 int transOC(string);
+int getValue(ifstream &, myObj *, int = 0, int = 0, int = 0, int = 0);
 
 int main(int argc, char **argv)
 {
     ifstream inFile;
     ofstream outFile;
-    vector<string> label;
-    vector<int> addr;
-    vector<int> fill;
-    int reg[8] = {0};
-    stack<int> stack;
-    int maxStack = 0, countStack = 0;
+    myObj obj;
     string temp;
 
     if (argc != 3)
@@ -50,11 +58,11 @@ int main(int argc, char **argv)
             if (isdigit(temp[0]))
                 errNotify('F');
             // --- check duplicate
-            for (string s : label)
+            for (string s : obj.label)
                 if (temp.compare(s) == 0)
                     errNotify('D');
-            label.push_back(temp);
-            addr.push_back(PC);
+            obj.label.push_back(temp);
+            obj.addr.push_back(PC);
         }
         nextLine(inFile);
         PC++;
@@ -76,11 +84,11 @@ int main(int argc, char **argv)
                 if (isLabel(temp))
                 {
                     bool undefine = true;
-                    for (int i = 0; i < label.size(); i++)
+                    for (int i = 0; i < obj.label.size(); i++)
                     {
-                        if (temp.compare(label[i]) == 0)
+                        if (temp.compare(obj.label[i]) == 0)
                         {
-                            fill.push_back(addr[i]);
+                            obj.fill.push_back(obj.addr[i]);
                             undefine = false;
                             break;
                         }
@@ -89,10 +97,10 @@ int main(int argc, char **argv)
                         errNotify('L');
                 }
                 else
-                    fill.push_back(stoi(temp));
+                    obj.fill.push_back(stoi(temp));
             }
             else
-                fill.push_back(0);
+                obj.fill.push_back(0);
         }
         nextLine(inFile);
         PC++;
@@ -114,25 +122,7 @@ int main(int argc, char **argv)
         dec += opcode << 22;
         if (temp.compare(".fill") == 0)
         {
-            inFile >> temp;
-            int num;
-            if (isLabel(temp))
-            {
-                bool undefine = true;
-                for (int i = 0; i < label.size(); i++)
-                {
-                    if (temp.compare(label[i]) == 0)
-                    {
-                        num = addr[i];
-                        undefine = false;
-                        break;
-                    }
-                }
-                if (undefine)
-                    errNotify('L');
-            }
-            else
-                num = stoi(temp);
+            int num = getValue(inFile, &obj);
             dec += num;
         }
         else if (opcode != 6 && opcode != 7)
@@ -149,103 +139,21 @@ int main(int argc, char **argv)
                 dest = getReg(inFile);
                 dec += dest;
                 if (opcode == 0)
-                    reg[dest] = reg[regA] + reg[regB];
+                    obj.reg[dest] = obj.reg[regA] + obj.reg[regB];
             }
             else if (opcode == 2)
             {
-                inFile >> temp;
-                int num;
-                if (isLabel(temp))
-                {
-                    bool undefine = true;
-                    for (int i = 0; i < label.size(); i++)
-                    {
-                        if (temp.compare(label[i]) == 0)
-                        {
-                            if (temp.compare("stack") == 0)
-                            {
-                                addr[i]--;
-                                reg[regB] = stack.top();
-                                stack.pop();
-                                countStack--;
-                            }
-                            else
-                                reg[regB] = fill[i];
-                            num = addr[i];
-                            undefine = false;
-                            break;
-                        }
-                    }
-                    if (undefine)
-                        errNotify('L');
-                    num -= reg[regA];
-                }
-                else
-                    num = stoi(temp);
-                to16Bits(num);
+                int num = getValue(inFile, &obj, opcode, regA, regB, PC);
                 dec += num;
             }
             else if (opcode == 3)
             {
-                inFile >> temp;
-                int num;
-                bool isLabel = !isdigit(temp[0]);
-                if (temp[0] == '-')
-                    isLabel = !isdigit(temp[1]);
-                if (isLabel)
-                {
-                    bool undefine = true;
-                    for (int i = 0; i < label.size(); i++)
-                    {
-                        if (temp.compare(label[i]) == 0)
-                        {
-                            num = addr[i];
-                            if (temp.compare("stack") == 0)
-                            {
-                                addr[i]++;
-                                stack.push(reg[regB]);
-                                countStack++;
-                                countStack > maxStack ? maxStack = countStack : 0;
-                            }
-                            undefine = false;
-                            break;
-                        }
-                    }
-                    if (undefine)
-                        errNotify('L');
-                    num -= reg[regA];
-                }
-                else
-                    num = stoi(temp);
-                to16Bits(num);
+                int num = getValue(inFile, &obj, opcode, regA, regB, PC);
                 dec += num;
             }
             else if (opcode == 4)
             {
-                inFile >> temp;
-                int num;
-                bool isLabel = !isdigit(temp[0]);
-                if (temp[0] == '-')
-                    isLabel = !isdigit(temp[1]);
-                if (isLabel)
-                {
-                    bool undefine = true;
-                    for (int i = 0; i < label.size(); i++)
-                    {
-                        if (temp.compare(label[i]) == 0)
-                        {
-                            num = addr[i];
-                            undefine = false;
-                            break;
-                        }
-                    }
-                    if (undefine)
-                        errNotify('L');
-                    num -= (PC + 1);
-                }
-                else
-                    num = stoi(temp);
-                to16Bits(num);
+                int num = getValue(inFile, &obj, opcode, regA, regB, PC);
                 dec += num;
             }
         }
@@ -255,7 +163,7 @@ int main(int argc, char **argv)
         PC++;
     }
     inFile.close();
-    for (int i = 1; i < maxStack; i++)
+    for (int i = 1; i < LEVEL_OF_STACK; i++)
         outFile << 0 << endl;
     outFile.close();
     return 0;
@@ -300,16 +208,10 @@ void nextLine(ifstream &inFile)
 void to16Bits(int &data)
 {
     while (data < 0 || data > 65535)
-    {
         if (data < 0)
-        {
             data += 65536;
-        }
         else
-        {
             data -= 65536;
-        }
-    }
 }
 
 void errNotify(char data)
@@ -361,4 +263,58 @@ int transOC(string data)
     else
         errNotify('C');
     return opcode;
+}
+
+int getValue(ifstream &inFile, myObj *obj, int opcode, int regA, int regB, int PC)
+{
+    string temp;
+    inFile >> temp;
+    int num;
+    if (isLabel(temp))
+    {
+        bool undefine = true;
+        for (int i = 0; i < obj->label.size(); i++)
+        {
+            if (temp.compare(obj->label[i]) == 0)
+            {
+                switch (opcode)
+                {
+                case 2:
+                    if (temp.compare("stack") == 0)
+                    {
+                        obj->addr[i]--;
+                        obj->reg[regB] = obj->stack.top();
+                        obj->stack.pop();
+                    }
+                    else
+                        obj->reg[regB] = obj->fill[i];
+                    num = obj->addr[i] - obj->reg[regA];
+                    break;
+                case 3:
+                    num = obj->addr[i] - obj->reg[regA];
+                    if (temp.compare("stack") == 0)
+                    {
+                        obj->addr[i]++;
+                        obj->stack.push(obj->reg[regB]);
+                    }
+                    break;
+                case 4:
+                    num = obj->addr[i] - (PC + 1);
+                    break;
+                default:
+                    num = obj->addr[i];
+                    break;
+                }
+                undefine = false;
+                break;
+            }
+        }
+        if (undefine)
+            errNotify('L');
+    }
+    else
+        num = stoi(temp);
+    if (opcode != 0)
+        to16Bits(num);
+    return num;
 }
