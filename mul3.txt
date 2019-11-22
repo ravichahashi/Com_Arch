@@ -1,0 +1,58 @@
+				lw		0		2		Mcand			#$2 = Mcand
+				lw		0		3		Mplier			#$3 = Mplier
+				lw		0		5		bit32
+				nand	2		5		6
+				nand	6		6		6
+				nand	3		5		7
+				nand	7		7		7
+				beq		6		7		eq
+				add		0		5		7
+				beq		0		0		store1
+eq				add		0		0		7
+store1			lw		0		1		one
+				sw		1		7		signbit
+				lw		0		4		allone
+				beq		6		5		sign1
+				beq		0		0		checksign2
+sign1			nand	4		2		2
+				add		2		1		2
+checksign2		beq		7		5		sign2
+				beq		0		0		store2
+sign2			nand	4		3		3
+				add		3		1		3		
+store2			add		0		0		1
+				lw		0		5		endloop			#$5 = endloop
+				lw		0		6		selectbit		#$6 = selectbit
+				lw		0		7		one				#$7 = constant value 1
+				add		0		0		4
+				sw		7		4		loopcount		#initailize countloop
+				lw		0		4		blockoverflow		
+				sw		7		4		memoverflow		#constant overflow value 
+selMplier		nand	3		6		4               #selectMplier to temp
+				nand	4		4		4				#true selectMplier
+				beq		0		4		shMcand			#if selectMplier == 0 skip add
+				add		2		1		1				#add Mcand to answer($1)
+shMcand			add		2		2		2				#shift Mcand
+				lw		7		4		memoverflow		#load memory overflow to $4
+				nand	2		4		4				#fillterdata
+				nand	4		4		2				#true fillterdata
+				add		6		6		6				#shift selectbit
+				lw		7		4		loopcount		#load memory loopcount
+				add		7		4		4				#loopcount++
+				sw		7		4		loopcount		#store loopcount to memory
+				beq		5		4		done			#if loopcount == 31 goto done
+				beq		0		0		selMplier		#goto selMplier
+done			lw		7		4		signbit
+				add		4		1		1
+				halt									#end program
+Mcand		 	.fill		1
+Mplier		 	.fill		2
+selectbit	 	.fill		1
+endloop			.fill		31
+one		 		.fill		1
+loopcount	    .fill	    60
+memoverflow		.fill		61
+signbit			.fill		62
+blockoverflow	.fill		2147483647
+bit32			.fill		2147483648
+allone			.fill		4294967295‬

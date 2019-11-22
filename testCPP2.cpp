@@ -11,17 +11,16 @@ public:
   int i = 5;
 };
 
-void hh(int = 99, string = "gg", int = 77);
+void hh(char = 'g', string = "", int = 77);
 
 int main()
 {
-  stack<int> d;
-  gg o;
-  hh();
+ int i=-1;
+  cout<<(unsigned short)i;
   return 0;
 }
 
-void hh(int io, string tt, int e)
+void hh(char io, string tt, int e)
 {
   cout << io << " " << tt << " " << e;
 }
